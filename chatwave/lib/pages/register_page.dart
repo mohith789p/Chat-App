@@ -2,20 +2,21 @@ import 'package:chatwave/components/button_field.dart';
 import 'package:chatwave/components/text_field.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
+class RegisterPage extends StatelessWidget {
   // email and password controller
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _pwController = TextEditingController();
+  final TextEditingController _pwconfirmController = TextEditingController();
 
   // navigate to register page
   final void Function()? onTap;
-  LoginPage({
+  RegisterPage({
     super.key,
     required this.onTap,
   });
 
   // login method
-  void login() {}
+  void register() {}
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,7 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: surfaceColor,
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text('Register'),
       ),
       body: Center(
         child: Column(
@@ -40,7 +41,7 @@ class LoginPage extends StatelessWidget {
             const SizedBox(height: 50),
             // welcome message
             Text(
-              'Welcome to chatWave!',
+              'Let\'s create an Account.',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
                 fontSize: 16,
@@ -59,21 +60,27 @@ class LoginPage extends StatelessWidget {
               obscureText: true,
               controller: _pwController,
             ),
+            // re enter password
+            MyTextField(
+              hintText: "Confirm Password",
+              obscureText: true,
+              controller: _pwconfirmController,
+            ),
             const SizedBox(height: 25),
-            // login button
+            // register button
             MyButton(
-              text: "Login",
-              onTap: login,
+              text: "Register",
+              onTap: register,
             ),
             const SizedBox(height: 25),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('New User? '),
+                const Text('Already have a account? '),
                 GestureDetector(
                   onTap: onTap,
                   child: const Text(
-                    'Register now.',
+                    'Login now.',
                     style: TextStyle(
                       color: Colors.lightBlue,
                       fontWeight: FontWeight.bold,

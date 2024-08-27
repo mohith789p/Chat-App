@@ -1,4 +1,5 @@
-import 'package:chatwave/pages/login_page.dart';
+// import 'package:chatwave/pages/login_page.dart';
+import 'package:chatwave/auth/login_or_register_page.dart';
 import 'package:chatwave/themes/light_mode.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      home: const LoginOrRegisterPage(),
       theme: lightMode,
     );
   }
