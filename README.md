@@ -1,2 +1,2 @@
-# Chat-App
-An app used for messaging
+# Chatwave
+An app used for messaging.
