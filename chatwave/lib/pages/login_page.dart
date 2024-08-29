@@ -31,6 +31,13 @@ class LoginPage extends StatelessWidget {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
+          backgroundColor: Colors.amber,
+          titlePadding: const EdgeInsets.all(45),
+          titleTextStyle: const TextStyle(
+            color: Colors.red,
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+          ),
           title: Text(
             e.toString(),
           ),
