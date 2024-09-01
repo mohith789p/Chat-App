@@ -1,5 +1,5 @@
 // import 'package:chatwave/pages/login_page.dart';
-import 'package:chatwave/auth/auth_gate.dart';
+import 'package:chatwave/services/auth/auth_gate.dart';
 import 'package:chatwave/firebase_options.dart';
 import 'package:chatwave/themes/light_mode.dart';
 import 'package:firebase_core/firebase_core.dart';

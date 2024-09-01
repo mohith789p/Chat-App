@@ -1,4 +1,4 @@
-import 'package:chatwave/auth/auth_service.dart';
+import 'package:chatwave/services/auth/auth_service.dart';
 import 'package:chatwave/components/button_field.dart';
 import 'package:chatwave/components/text_field.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +54,9 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: surfaceColor,
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text(
+          'Login',
+        ),
       ),
       body: Center(
         child: Column(
