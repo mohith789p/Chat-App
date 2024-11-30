@@ -64,8 +64,6 @@ class ChatPage extends StatelessWidget {
         if (snapshot.data!.docs.isEmpty) {
           return const Center(child: Text("No messages"));
         }
-        print("Snapshot data: ${snapshot.data}");
-        print("Snapshot error: ${snapshot.error}");
         // return list view
         return ListView(
           children:
