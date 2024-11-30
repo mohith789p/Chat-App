@@ -53,7 +53,7 @@ class ChatService {
     String chatRoomID = ids.join('_');
 
     return _firestore
-        .collection("chat_rooms")
+        .collection("Chat_rooms")
         .doc(chatRoomID)
         .collection("messages")
         .orderBy("timestamp", descending: false)
