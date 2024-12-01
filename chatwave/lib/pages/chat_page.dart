@@ -5,74 +5,119 @@ import 'package:chatwave/services/chat/chat_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class ChatPage extends StatelessWidget {
+class ChatPage extends StatefulWidget {
   final String receiverEmail;
   final String receiverID;
-  ChatPage({
+  const ChatPage({
     super.key,
     required this.receiverEmail,
     required this.receiverID,
   });
 
-  // text controller
+  @override
+  State<ChatPage> createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   final TextEditingController _messageController = TextEditingController();
-  // chat & auth serrvices
   final ChatService _chatService = ChatService();
   final AuthService _authService = AuthService();
+  final ScrollController _scrollController = ScrollController();
 
-  // send message
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    // Scroll to bottom on load
+    Future.delayed(
+      const Duration(milliseconds: 300),
+      scrollDown,
+    );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    // Scroll down when the keyboard becomes visible
+    Future.delayed(const Duration(milliseconds: 100), scrollDown);
+  }
+
+  void scrollDown() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
   void sendMessage() async {
-    // if message is not empty
-    if (_messageController.text.isNotEmpty) {
-      // send the message
-      await _chatService.sendMessage(receiverID, _messageController.text);
+    final text = _messageController.text.trim();
+    if (text.isNotEmpty) {
+      await _chatService.sendMessage(widget.receiverID, text);
       _messageController.clear();
+      scrollDown();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        title: Text(receiverEmail),
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.purple,
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          // display all messages
-          Expanded(child: _buildMessageList()),
-          // user input
-          _buildUserInput()
-        ],
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(), // Dismiss keyboard
+      child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        resizeToAvoidBottomInset: true, // Adjust layout when keyboard is shown
+        appBar: AppBar(
+          title: Text(widget.receiverEmail),
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.purple,
+          elevation: 0,
+        ),
+        body: Column(
+          children: [
+            // Display all messages
+            Expanded(child: _buildMessageList()),
+            // User input fixed at the bottom
+            SafeArea(
+              child: _buildUserInput(),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // build message list
   Widget _buildMessageList() {
     String senderID = _authService.getCurrentUser()!.uid;
     return StreamBuilder(
-      stream: _chatService.getMessages(receiverID, senderID),
+      stream: _chatService.getMessages(widget.receiverID, senderID),
       builder: (context, snapshot) {
-        // error
         if (snapshot.hasError) {
           return const Center(child: Text("Error"));
         }
-        // loading
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: Text("Loading..."));
         }
-        // No data
-        if (snapshot.data!.docs.isEmpty) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return const Center(child: Text("No messages"));
         }
-        // return list view
-        return ListView(
-          children:
-              snapshot.data!.docs.map((doc) => _buildMessageItem(doc)).toList(),
+
+        return ListView.builder(
+          controller: _scrollController,
+          itemCount: snapshot.data!.docs.length,
+          itemBuilder: (context, index) {
+            return _buildMessageItem(snapshot.data!.docs[index]);
+          },
         );
       },
     );
@@ -80,7 +125,6 @@ class ChatPage extends StatelessWidget {
 
   Widget _buildMessageItem(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    // is current user align to right
     bool isCurrentUser = data['senderID'] == _authService.getCurrentUser()!.uid;
     var alignment =
         isCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
@@ -90,19 +134,17 @@ class ChatPage extends StatelessWidget {
         crossAxisAlignment:
             isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          ChatBubble(message: data['message'], isCurrentUser: isCurrentUser)
+          ChatBubble(message: data['message'], isCurrentUser: isCurrentUser),
         ],
       ),
     );
   }
 
-  // build message input
   Widget _buildUserInput() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 50.0),
+      padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
-          // textfield should take up most of the space
           Expanded(
             child: MyTextField(
               controller: _messageController,
@@ -110,18 +152,15 @@ class ChatPage extends StatelessWidget {
               obscureText: false,
             ),
           ),
-          // send button
           Container(
             decoration: const BoxDecoration(
               color: Colors.green,
               shape: BoxShape.circle,
             ),
-            margin: const EdgeInsets.only(right: 25),
+            margin: const EdgeInsets.only(left: 8),
             child: IconButton(
               onPressed: sendMessage,
-              icon: const Icon(
-                Icons.send,
-              ),
+              icon: const Icon(Icons.send),
             ),
           ),
         ],
